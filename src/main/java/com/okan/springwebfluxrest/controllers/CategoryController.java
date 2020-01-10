@@ -2,10 +2,10 @@ package com.okan.springwebfluxrest.controllers;
 
 import com.okan.springwebfluxrest.domain.Category;
 import com.okan.springwebfluxrest.repositories.CategoryRepository;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,14 +27,20 @@ public class CategoryController {
     }
 
     @GetMapping(CategoryController.BASE_URL)
-    // Flux for 0 or many results
+        // Flux for 0 or many results
     Flux<Category> showCategories() {
         return categoryRepository.findAll();
     }
 
     @GetMapping(CategoryController.BASE_URL + CategoryController.ID)
-    // Mono for 0 or 1 result
+        // Mono for 0 or 1 result
     Mono<Category> findCategoryById(@PathVariable String id) {
         return categoryRepository.findById(id);
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(BASE_URL)
+    Mono<Void> createCategory(@RequestBody Publisher<Category> categoryStream) {
+        return categoryRepository.saveAll(categoryStream).then();
     }
 }
