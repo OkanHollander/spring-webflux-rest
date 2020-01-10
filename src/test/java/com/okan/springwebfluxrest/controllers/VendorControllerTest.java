@@ -7,9 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * Author:   Okan Hollander
@@ -49,5 +52,20 @@ public class VendorControllerTest {
         webTestClient.get().uri(VendorController.BASE_URL + "id")
                 .exchange()
                 .expectBody(Category.class);
+    }
+
+    @Test
+    public void createCategory() {
+        BDDMockito.given(vendorRepository.saveAll(any(Publisher.class)))
+                .willReturn(Flux.just(Vendor.builder().firstName("firstName").build()));
+
+        Mono<Vendor> savedVendor = Mono.just(Vendor.builder().firstName("Okan").build());
+
+        webTestClient.post()
+                .uri(VendorController.BASE_URL)
+                .body(savedVendor, Vendor.class)
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 }

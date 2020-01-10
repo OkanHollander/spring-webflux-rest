@@ -2,10 +2,10 @@ package com.okan.springwebfluxrest.controllers;
 
 import com.okan.springwebfluxrest.domain.Vendor;
 import com.okan.springwebfluxrest.repositories.VendorRepository;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,5 +34,11 @@ public class VendorController {
     @GetMapping(VendorController.BASE_URL + VendorController.ID)
     Mono<Vendor> findVendorById(@PathVariable String id) {
         return vendorRepository.findById(id);
+    }
+
+    @PostMapping(BASE_URL)
+    @ResponseStatus(HttpStatus.CREATED)
+    Mono<Void> createVendor(@RequestBody Publisher<Vendor> vendorStream) {
+        return vendorRepository.saveAll(vendorStream).then();
     }
 }
